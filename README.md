@@ -14,7 +14,7 @@
 ## 第一次使用
 
 ```bash
-cd /Users/reinyu/Documents/Code/ai-council-workspace
+cd /path/to/ai-council-workspace
 npm run doctor
 $EDITOR .ai-team/CONTEXT.md
 $EDITOR .ai-team/TASK.md
@@ -46,6 +46,7 @@ npm run team:reject -- "说明需要修改的内容"
 - Codex 默认运行在 `workspace-write` 沙盒中。Claw 的无头模式要求 Claude 和 Antigravity 自动批准工具，因此它们主要依赖 `AGENTS.md` 和 Council 系统提示中的仓库边界。只在这个专用仓库中运行，不要把工作目录指向主目录或包含私密文件的目录。
 - `.ai-team/runtime/`、模型 worktree、运行日志和依赖不会进入 Git。
 - `team:accept` 会清理 Council worktree/分支，并把本轮摘要归档到 `.ai-team/history/`。
+- `npm run team` 会在派发模型之前从宿主工作区执行一次登录预检。模型自己的隔离 worktree 可能无法读取其他厂商的登录凭据，因此 worktree 内的登录检查不能替代宿主预检。
 
 ## 常用文件
 
@@ -61,4 +62,3 @@ npm run team:reject -- "说明需要修改的内容"
 ## 注意
 
 三个模型并不是共享一个厂商侧聊天记录。共享上下文由 Git 文件、`plan.md`、Council 的历史摘要和本地运行账本共同实现。把重要事实写入共享文件，比依赖某个模型的临时记忆更可靠。
-

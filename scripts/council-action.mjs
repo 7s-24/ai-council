@@ -13,6 +13,13 @@ if (action === 'status') {
 
 const manager = new SessionManager();
 
+function sanitizeForArchive(value) {
+  return String(value || '')
+    .split(root)
+    .join('<workspace>')
+    .replace(/\/Users\/[^/\s`]+/g, '/Users/<redacted>');
+}
+
 try {
   if (action === 'review') {
     const review = await manager.councilReview(last.id);
@@ -25,10 +32,22 @@ try {
     const historyDir = path.join(root, '.ai-team', 'history');
     fs.mkdirSync(historyDir, { recursive: true });
     const historyPath = path.join(historyDir, `${stamp()}-${last.id}.md`);
-    const plan = review.planContent ? `\n## Council plan\n\n${review.planContent}\n` : '';
+    const plan = review.planContent
+      ? `\n## Council plan\n\n${sanitizeForArchive(review.planContent)}\n`
+      : '';
+    const reviewsDir = path.join(root, 'reviews');
+    const reviewFiles = fs.existsSync(reviewsDir)
+      ? fs.readdirSync(reviewsDir).filter((file) => file.endsWith('.md')).sort()
+      : [];
+    const peerReviews = reviewFiles
+      .map((file) => {
+        const content = fs.readFileSync(path.join(reviewsDir, file), 'utf8');
+        return `\n### ${file}\n\n${sanitizeForArchive(content)}\n`;
+      })
+      .join('');
     fs.writeFileSync(
       historyPath,
-      `# Council Run ${last.id}\n\n- Status: ${review.status}\n- Rounds: ${review.rounds}\n- Safety branch: \`${last.backupBranch}\`\n\n## Final summary\n\n${last.finalSummary || 'No summary was recorded.'}\n${plan}`,
+      `# Council Run ${last.id}\n\n- Status: ${last.status}\n- Rounds: ${last.review?.rounds ?? review.rounds}\n- Safety branch: \`${last.backupBranch}\`\n\n## Final summary\n\n${sanitizeForArchive(last.finalSummary || 'No summary was recorded.')}\n${plan}\n## Peer reviews\n${peerReviews || '\nNo peer review files were recorded.\n'}`,
     );
     const result = await manager.councilAccept(last.id);
 
@@ -68,4 +87,3 @@ try {
   console.error(error);
   process.exit(1);
 }
-

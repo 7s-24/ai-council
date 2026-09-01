@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { SessionManager } from '@enderfga/claw-orchestrator';
 import {
+  command,
   compactReview,
   git,
   lastRunPath,
@@ -41,6 +42,13 @@ for (const expected of ['claude', 'codex', 'agy']) {
 }
 
 requireCleanMain();
+
+const doctor = command(process.execPath, ['scripts/doctor.mjs']);
+process.stdout.write(doctor.stdout || '');
+process.stderr.write(doctor.stderr || '');
+if (doctor.status !== 0) {
+  throw new Error('Host CLI/login preflight failed. Fix `npm run doctor` before starting Council.');
+}
 
 console.log(`Workspace: ${root}`);
 console.log(`Task: ${relativeTaskPath}`);
@@ -85,6 +93,7 @@ try {
     defaultPermissionMode: 'bypassPermissions',
   });
   councilId = started.id;
+  const liveCouncil = manager.getCouncil(councilId);
   writeJson(lastRunPath, {
     id: councilId,
     status: started.status,
@@ -97,7 +106,7 @@ try {
   const deadline = Date.now() + Math.max(600000, team.agentTimeoutMs * team.maxRounds + 60000);
   let current = started;
   while (Date.now() < deadline) {
-    current = manager.councilStatus(councilId);
+    current = liveCouncil?.getSession() || manager.councilStatus(councilId);
     if (!current) throw new Error('Council state disappeared.');
     if (current.status !== 'running') break;
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -109,6 +118,9 @@ try {
   }
 
   const review = await manager.councilReview(councilId);
+  const completedRounds = current.responses.length
+    ? Math.max(...current.responses.map((response) => response.round))
+    : 0;
   writeJson(lastRunPath, {
     id: councilId,
     status: current.status,
@@ -117,7 +129,11 @@ try {
     startedAt: current.startTime,
     endedAt: current.endTime,
     finalSummary: current.finalSummary,
-    review: compactReview(review),
+    review: {
+      ...compactReview(review),
+      status: current.status,
+      rounds: completedRounds,
+    },
   });
 
   console.log(`Council finished with status: ${current.status}`);
@@ -135,4 +151,3 @@ try {
   console.error(error);
   process.exit(1);
 }
-

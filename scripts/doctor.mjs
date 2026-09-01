@@ -1,4 +1,4 @@
-import { command, git, root } from './lib.mjs';
+import { command, git } from './lib.mjs';
 
 const checks = [];
 
@@ -41,7 +41,7 @@ record('Claw Orchestrator', clawVersion, (r) => (r.stdout || r.stderr).trim().sp
 
 try {
   git(['rev-parse', '--is-inside-work-tree']);
-  checks.push({ name: 'Git workspace', ok: true, detail: root });
+  checks.push({ name: 'Git workspace', ok: true, detail: 'repository detected' });
 } catch (error) {
   checks.push({ name: 'Git workspace', ok: false, detail: error.message });
 }
@@ -53,4 +53,3 @@ for (const check of checks) {
 if (checks.some((check) => !check.ok)) {
   process.exitCode = 1;
 }
-
