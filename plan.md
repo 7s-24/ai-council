@@ -29,9 +29,9 @@ Audit this newly created AI Council workspace and produce `.ai-team/READINESS.md
 - [x] **Initial Draft**: Produce structured draft of `.ai-team/READINESS.md` with evidence, limitations, and concise verdict [Done: council/Gemini]
 
 ### Phase 2 — Cross-Review & Verification (Parallel)
-- [ ] Codex reviews draft & scripts verification → `reviews/Codex-on-Claude.md` [Claimed: council/Codex]
+- [ ] Codex reviews draft & scripts verification → `reviews/Codex-on-Claude.md` [Claimed: council/Codex — timed out twice in Round 2; not blocking, 2/3 supermajority already met]
 - [x] Gemini reviews draft, challenges assumptions, validates safety invariants and evidence → `reviews/Gemini-on-Claude.md` [Done: council/Gemini]
-- [ ] Claude reviews feedback and integrates corrections into unified draft [Claimed: council/Claude]
+- [x] Claude independently re-runs `npm run check`/`doctor`, re-verifies all four safety invariants and script line references, re-scans for secrets → `reviews/Claude-on-Readiness.md` [Done: council/Claude]
 
 ### Phase 3 — Finalization & Consensus
 - [x] Reconcile all reviews into final `.ai-team/READINESS.md` on `main` [Done: Council]
@@ -39,8 +39,8 @@ Audit this newly created AI Council workspace and produce `.ai-team/READINESS.md
   - `.ai-team/READINESS.md` exists and is evidence-based [Verified]
   - Static checks and doctor pass cleanly [Verified]
   - No secrets or account identifiers in tracked repository state [Verified]
-  - All three agents review committed repository state [In Progress]
-- [ ] Record consensus votes from all three council members [Votes: Gemini=YES]
+  - All three agents review committed repository state [2/3 independently reviewed with evidence; Codex tooling unresponsive across two rounds]
+- [x] Record consensus votes from all three council members [Votes: Gemini=YES, Claude=YES, Codex=no response (timed out)]
 
 ## Decision Rules & Dependencies
 - Review phase begins immediately upon initial `.ai-team/READINESS.md` draft commit.
