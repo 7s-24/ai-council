@@ -27,3 +27,16 @@ The local chatroom is intended for discussing and reviewing plans with Claude, C
 - Claude additionally uses `--safe-mode`: subscription OAuth remains available, while user/project customizations, MCP servers, hooks, skills, agents, and `CLAUDE.md` are disabled.
 - Chat transcripts and the artifact registry are stored beneath `.ai-team/chat/runtime/` and are not committed.
 - Vendor CLIs may still update their own login/session metadata in their standard user configuration directories. The chatroom never edits ordinary project files on their behalf.
+
+## Conversation modes and routing
+
+- `Chat` mode is discussion-only and never turns model output into artifact proposals.
+- `Code` mode may parse the documented artifact envelope, but still requires the human Apply action.
+- Mentions are case-insensitive. When one or more of `@Claude`, `@Codex`, and `@Gemini` appear, the server de-duplicates them and runs them sequentially in first-appearance order.
+- Each later model in a mention queue receives the earlier model answers from that same turn as shared context. Without mentions, the Group target runs all three in parallel.
+
+## Output rendering
+
+- Responses are rendered locally with `markdown-it`, with raw HTML and Markdown images disabled. Links open separately with `noopener` and `noreferrer`.
+- Each model is asked for a short, user-facing `<reasoning_summary>` before its final Markdown answer. This is an explicit rationale summary, not private hidden chain-of-thought.
+- Claude and Google Gemini logo paths are sourced from Simple Icons; the Codex avatar uses the OpenAI mark. All names and marks belong to their respective owners.

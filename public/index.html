@@ -39,19 +39,28 @@
         </aside>
 
         <section class="chat-panel" aria-label="小组聊天室">
+          <div class="chat-toolbar">
+            <div class="mode-switch" role="tablist" aria-label="工作模式">
+              <button class="mode-button active" type="button" role="tab" aria-selected="true" data-mode="chat">Chat</button>
+              <button class="mode-button" type="button" role="tab" aria-selected="false" data-mode="code">Code</button>
+            </div>
+            <span id="mode-description">讨论、分析和审阅，不生成文件草案</span>
+          </div>
           <div id="empty-state" class="empty-state">
             <div class="council-mark" aria-hidden="true">
-              <span>C</span><span>G</span><span>G</span>
+              <span><img src="/logos/claude.svg" alt=""></span>
+              <span><img src="/logos/codex.svg" alt=""></span>
+              <span><img src="/logos/gemini.svg" alt=""></span>
             </div>
             <h2>让三位审阅者看同一份材料</h2>
-            <p>选择文件，提出你的计划。Claude、Codex 和 Gemini 会共享这间房最近的对话，但不能直接碰项目文件。</p>
+            <p>选择文件，提出你的计划。输入 <strong>@Gemini @Claude @Codex</strong> 即可让它们按这个顺序接力回复。</p>
           </div>
           <div id="messages" class="messages" aria-live="polite"></div>
 
           <form id="composer" class="composer">
             <div class="composer-controls">
               <label>
-                <span class="sr-only">发送给</span>
+                <span class="select-label">未使用 @ 时</span>
                 <select id="target">
                   <option value="group">小组 · 三者并行</option>
                   <option value="claude">仅 Claude</option>
@@ -59,10 +68,14 @@
                   <option value="gemini">仅 Gemini</option>
                 </select>
               </label>
-              <label class="proposal-toggle">
-                <input id="allow-artifacts" type="checkbox">
-                <span>允许提出文件草案</span>
-              </label>
+              <span id="composer-mode" class="composer-mode">Chat 模式</span>
+            </div>
+            <div class="mention-row">
+              <span class="mention-label">@ 按顺序</span>
+              <button class="mention-chip" type="button" data-mention="Claude"><img src="/logos/claude.svg" alt="">Claude</button>
+              <button class="mention-chip" type="button" data-mention="Codex"><img src="/logos/codex.svg" alt="">Codex</button>
+              <button class="mention-chip" type="button" data-mention="Gemini"><img src="/logos/gemini.svg" alt="">Gemini</button>
+              <span id="route-preview" class="route-preview">未指定 @：三者并行</span>
             </div>
             <textarea id="message" rows="4" maxlength="12000" placeholder="例如：请审阅这个实施计划，分别指出遗漏、风险和更简单的方案。" required></textarea>
             <div class="composer-footer">
@@ -94,7 +107,7 @@
               </div>
               <span id="proposal-count" class="count">0</span>
             </div>
-            <p id="proposal-empty" class="hint">开启“允许提出文件草案”后，模型的写入建议会出现在这里。</p>
+            <p id="proposal-empty" class="hint">切换到 Code 模式后，模型提出的文件草案会出现在这里。</p>
             <div id="proposals" class="proposal-list"></div>
           </section>
 
@@ -124,6 +137,7 @@
     </dialog>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/vendor/markdown-it.min.js"></script>
     <script src="/app.js" defer></script>
   </body>
 </html>

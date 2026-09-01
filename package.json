@@ -13,10 +13,13 @@
     "team:reject": "node scripts/council-action.mjs reject",
     "team:status": "node scripts/council-action.mjs status",
     "chat": "node scripts/chat-server.mjs",
-    "chat:test": "node --test scripts/chat-policy.test.mjs",
-    "check": "node --check scripts/lib.mjs && node --check scripts/doctor.mjs && node --check scripts/council.mjs && node --check scripts/council-action.mjs && node --check scripts/chat-policy.mjs && node --check scripts/chat-server.mjs && npm run chat:test"
+    "chat:test": "node --test scripts/chat-policy.test.mjs scripts/chat-protocol.test.mjs scripts/markdown-render.test.mjs",
+    "check": "node --check scripts/lib.mjs && node --check scripts/doctor.mjs && node --check scripts/council.mjs && node --check scripts/council-action.mjs && node --check scripts/chat-policy.mjs && node --check scripts/chat-protocol.mjs && node --check scripts/chat-server.mjs && node --check public/app.js && npm run chat:test"
   },
   "devDependencies": {
     "@enderfga/claw-orchestrator": "6.2.0"
+  },
+  "dependencies": {
+    "markdown-it": "15.0.1"
   }
 }
