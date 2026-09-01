@@ -18,6 +18,7 @@ cd /path/to/ai-council-workspace
 npm run doctor
 $EDITOR .ai-team/CONTEXT.md
 $EDITOR .ai-team/TASK.md
+# 将 TASK.md 中的 Status 改为 READY
 git add .ai-team
 git commit -m "Define council task"
 npm run team:dry-run
@@ -47,6 +48,7 @@ npm run team:reject -- "说明需要修改的内容"
 - `.ai-team/runtime/`、模型 worktree、运行日志和依赖不会进入 Git。
 - `team:accept` 会清理 Council worktree/分支，并把本轮摘要归档到 `.ai-team/history/`。
 - `npm run team` 会在派发模型之前从宿主工作区执行一次登录预检。模型自己的隔离 worktree 可能无法读取其他厂商的登录凭据，因此 worktree 内的登录检查不能替代宿主预检。
+- `.ai-team/TASK.md` 默认是 `Status: WAITING`；必须写清目标和验收标准并改为 `Status: READY`，启动器才会调用模型。
 
 ## 常用文件
 

@@ -13,6 +13,11 @@ import {
   writeJson,
 } from './lib.mjs';
 
+function fail(message) {
+  console.error(`ERROR: ${message}`);
+  process.exit(1);
+}
+
 const argv = process.argv.slice(2);
 const dryRun = argv.includes('--dry-run');
 const taskArgument = argv.find((value) => !value.startsWith('--'));
@@ -20,34 +25,41 @@ const taskPath = path.resolve(root, taskArgument || '.ai-team/TASK.md');
 const relativeTaskPath = path.relative(root, taskPath);
 
 if (relativeTaskPath.startsWith('..') || path.isAbsolute(relativeTaskPath)) {
-  throw new Error('The task file must be inside this repository.');
+  fail('The task file must be inside this repository.');
 }
 if (!fs.existsSync(taskPath)) {
-  throw new Error(`Task file not found: ${taskPath}`);
+  fail(`Task file not found: ${taskPath}`);
 }
 
 const task = fs.readFileSync(taskPath, 'utf8').trim();
 if (task.length < 80) {
-  throw new Error('The task is too short. Add a goal, required work, and acceptance criteria.');
+  fail('The task is too short. Add a goal, required work, and acceptance criteria.');
+}
+if (!/^Status:\s*READY\s*$/im.test(task)) {
+  fail('The task is not ready. Complete TASK.md and set `Status: READY`.');
 }
 
 const teamPath = path.join(root, '.ai-team', 'team.json');
 const team = readJson(teamPath);
 if (!Array.isArray(team.agents) || team.agents.length !== 3) {
-  throw new Error('team.json must define exactly three agents.');
+  fail('team.json must define exactly three agents.');
 }
 const engines = new Set(team.agents.map((agent) => agent.engine));
 for (const expected of ['claude', 'codex', 'agy']) {
-  if (!engines.has(expected)) throw new Error(`team.json is missing engine '${expected}'.`);
+  if (!engines.has(expected)) fail(`team.json is missing engine '${expected}'.`);
 }
 
-requireCleanMain();
+try {
+  requireCleanMain();
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
 
 const doctor = command(process.execPath, ['scripts/doctor.mjs']);
 process.stdout.write(doctor.stdout || '');
 process.stderr.write(doctor.stderr || '');
 if (doctor.status !== 0) {
-  throw new Error('Host CLI/login preflight failed. Fix `npm run doctor` before starting Council.');
+  fail('Host CLI/login preflight failed. Fix `npm run doctor` before starting Council.');
 }
 
 console.log(`Workspace: ${root}`);
