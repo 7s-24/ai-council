@@ -1,0 +1,21 @@
+{
+  "name": "ai-council-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A local shared workspace for Claude Code, Codex CLI, and Antigravity CLI.",
+  "scripts": {
+    "doctor": "node scripts/doctor.mjs",
+    "team": "node scripts/council.mjs",
+    "team:dry-run": "node scripts/council.mjs --dry-run",
+    "team:review": "node scripts/council-action.mjs review",
+    "team:accept": "node scripts/council-action.mjs accept",
+    "team:reject": "node scripts/council-action.mjs reject",
+    "team:status": "node scripts/council-action.mjs status",
+    "check": "node --check scripts/lib.mjs && node --check scripts/doctor.mjs && node --check scripts/council.mjs && node --check scripts/council-action.mjs"
+  },
+  "devDependencies": {
+    "@enderfga/claw-orchestrator": "6.2.0"
+  }
+}
+

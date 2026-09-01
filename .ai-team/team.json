@@ -1,0 +1,30 @@
+{
+  "maxRounds": 3,
+  "agentTimeoutMs": 300000,
+  "maxTurnsPerAgent": 12,
+  "maxBudgetUsd": 0.5,
+  "agents": [
+    {
+      "name": "Claude",
+      "emoji": "C",
+      "engine": "claude",
+      "permissionMode": "bypassPermissions",
+      "persona": "Requirements and architecture reviewer. Clarify intent, identify edge cases, and keep plans coherent."
+    },
+    {
+      "name": "Codex",
+      "emoji": "X",
+      "engine": "codex",
+      "permissionMode": "auto",
+      "persona": "Implementation and integration engineer. Make scoped changes, run tests, and verify Git state."
+    },
+    {
+      "name": "Gemini",
+      "emoji": "G",
+      "engine": "agy",
+      "permissionMode": "bypassPermissions",
+      "persona": "Independent reviewer. Challenge assumptions, find missing risks, and verify evidence."
+    }
+  ]
+}
+
