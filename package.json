@@ -12,10 +12,11 @@
     "team:accept": "node scripts/council-action.mjs accept",
     "team:reject": "node scripts/council-action.mjs reject",
     "team:status": "node scripts/council-action.mjs status",
-    "check": "node --check scripts/lib.mjs && node --check scripts/doctor.mjs && node --check scripts/council.mjs && node --check scripts/council-action.mjs"
+    "chat": "node scripts/chat-server.mjs",
+    "chat:test": "node --test scripts/chat-policy.test.mjs",
+    "check": "node --check scripts/lib.mjs && node --check scripts/doctor.mjs && node --check scripts/council.mjs && node --check scripts/council-action.mjs && node --check scripts/chat-policy.mjs && node --check scripts/chat-server.mjs && npm run chat:test"
   },
   "devDependencies": {
     "@enderfga/claw-orchestrator": "6.2.0"
   }
 }
-

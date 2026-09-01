@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Plan Review Room</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">LOCAL AI COUNCIL</p>
+          <h1>计划审阅室</h1>
+        </div>
+        <div class="topbar-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="room-status">正在连接本地服务…</span>
+          <span class="pill">仅本机</span>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="panel file-panel" aria-label="文件选择">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">EVIDENCE</p>
+              <h2>本轮材料</h2>
+            </div>
+            <span id="selected-count" class="count">0 / 12</span>
+          </div>
+          <p class="hint">只有你勾选的文本文件会作为副本发给模型。</p>
+          <label class="search-field">
+            <span aria-hidden="true">⌕</span>
+            <input id="file-search" type="search" placeholder="搜索项目文件" autocomplete="off">
+          </label>
+          <div id="file-list" class="file-list" role="list"></div>
+        </aside>
+
+        <section class="chat-panel" aria-label="小组聊天室">
+          <div id="empty-state" class="empty-state">
+            <div class="council-mark" aria-hidden="true">
+              <span>C</span><span>G</span><span>G</span>
+            </div>
+            <h2>让三位审阅者看同一份材料</h2>
+            <p>选择文件，提出你的计划。Claude、Codex 和 Gemini 会共享这间房最近的对话，但不能直接碰项目文件。</p>
+          </div>
+          <div id="messages" class="messages" aria-live="polite"></div>
+
+          <form id="composer" class="composer">
+            <div class="composer-controls">
+              <label>
+                <span class="sr-only">发送给</span>
+                <select id="target">
+                  <option value="group">小组 · 三者并行</option>
+                  <option value="claude">仅 Claude</option>
+                  <option value="codex">仅 Codex</option>
+                  <option value="gemini">仅 Gemini</option>
+                </select>
+              </label>
+              <label class="proposal-toggle">
+                <input id="allow-artifacts" type="checkbox">
+                <span>允许提出文件草案</span>
+              </label>
+            </div>
+            <textarea id="message" rows="4" maxlength="12000" placeholder="例如：请审阅这个实施计划，分别指出遗漏、风险和更简单的方案。" required></textarea>
+            <div class="composer-footer">
+              <span class="shortcut">⌘ / Ctrl + Enter 发送</span>
+              <button id="send" class="primary-button" type="submit">
+                <span>发给审阅组</span><span aria-hidden="true">↑</span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <aside class="panel artifact-panel" aria-label="安全边界和文件草案">
+          <div class="safety-card">
+            <p class="section-kicker">BOUNDARY</p>
+            <h2>写入保险箱</h2>
+            <ul>
+              <li><span>✓</span> 可读：你本轮勾选的文本副本</li>
+              <li><span>✓</span> 可写：仅 <code>artifacts/</code> 新文件</li>
+              <li><span>✓</span> 可改：仅聊天室已创建且未被外部改动的文件</li>
+              <li class="denied"><span>×</span> 删除、重命名、覆盖其他文件</li>
+            </ul>
+          </div>
+
+          <section class="artifact-section">
+            <div class="panel-heading compact">
+              <div>
+                <p class="section-kicker">PROPOSALS</p>
+                <h2>待确认草案</h2>
+              </div>
+              <span id="proposal-count" class="count">0</span>
+            </div>
+            <p id="proposal-empty" class="hint">开启“允许提出文件草案”后，模型的写入建议会出现在这里。</p>
+            <div id="proposals" class="proposal-list"></div>
+          </section>
+
+          <section class="artifact-section managed-section">
+            <div class="panel-heading compact">
+              <div>
+                <p class="section-kicker">MANAGED</p>
+                <h2>聊天室文件</h2>
+              </div>
+              <button id="refresh-artifacts" class="icon-button" type="button" aria-label="刷新文件">↻</button>
+            </div>
+            <div id="artifact-list" class="managed-list"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <dialog id="preview-dialog" class="preview-dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="section-kicker">READ-ONLY PREVIEW</p>
+          <h2 id="preview-title">文件预览</h2>
+        </div>
+        <button id="close-preview" class="icon-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <pre id="preview-content"></pre>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
