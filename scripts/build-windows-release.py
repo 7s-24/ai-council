@@ -61,7 +61,7 @@ def main():
     if STAGE.exists():
         shutil.rmtree(STAGE)
     STAGE.mkdir(parents=True)
-    copy(ROOT / 'THIRD_PARTY_NOTICES.md', STAGE / 'THIRD_PARTY_NOTICES.md')
+    copy(ROOT / 'licenses/claw-orchestrator-MIT.txt', STAGE / 'THIRD-PARTY-LICENSES/claw-orchestrator/LICENSE')
     copy(ROOT / 'LICENSE', STAGE / 'LICENSE')
     for filename in SCRIPTS:
         copy(ROOT / 'scripts' / filename, STAGE / 'app/scripts' / filename)

@@ -1,8 +1,8 @@
 import AppKit
 
 let arguments = CommandLine.arguments
-guard arguments.count == 5 else {
-    fputs("usage: IconGenerator claude.svg codex.svg gemini.svg output.png\n", stderr)
+guard arguments.count == 2 else {
+    fputs("usage: IconGenerator output.png\n", stderr)
     exit(2)
 }
 
@@ -20,28 +20,27 @@ NSGradient(colors: [
     NSColor(calibratedRed: 0.20, green: 0.55, blue: 0.42, alpha: 1),
 ])?.draw(in: background, angle: -45)
 
-let logoPaths = Array(arguments[1...3])
-let cardOrigins: [CGFloat] = [132, 387, 642]
-for (index, path) in logoPaths.enumerated() {
-    let cardRect = NSRect(x: cardOrigins[index], y: 362, width: 250, height: 300)
-    NSGraphicsContext.saveGraphicsState()
-    let shadow = NSShadow()
-    shadow.shadowColor = NSColor.black.withAlphaComponent(0.18)
-    shadow.shadowBlurRadius = 28
-    shadow.shadowOffset = NSSize(width: 0, height: -10)
-    shadow.set()
-    NSColor.white.withAlphaComponent(0.96).setFill()
-    NSBezierPath(roundedRect: cardRect, xRadius: 68, yRadius: 68).fill()
-    NSGraphicsContext.restoreGraphicsState()
-
-    if let logo = NSImage(contentsOfFile: path) {
-        logo.draw(
-            in: NSRect(x: cardRect.midX - 70, y: cardRect.midY - 70, width: 140, height: 140),
-            from: .zero,
-            operation: .sourceOver,
-            fraction: 1
-        )
-    }
+// Three voices around one shared space: original AI Council artwork.
+let centers: [NSPoint] = [NSPoint(x: 340, y: 620), NSPoint(x: 684, y: 620), NSPoint(x: 512, y: 340)]
+let ring = NSBezierPath()
+ring.move(to: centers[0])
+ring.line(to: centers[1])
+ring.line(to: centers[2])
+ring.close()
+ring.lineWidth = 36
+ring.lineJoinStyle = .round
+NSColor.white.withAlphaComponent(0.40).setStroke()
+ring.stroke()
+for center in centers {
+    let rect = NSRect(x: center.x - 102, y: center.y - 82, width: 204, height: 164)
+    NSColor.white.setFill()
+    NSBezierPath(roundedRect: rect, xRadius: 54, yRadius: 54).fill()
+    let tail = NSBezierPath()
+    tail.move(to: NSPoint(x: center.x - 45, y: center.y - 65))
+    tail.line(to: NSPoint(x: center.x - 45, y: center.y - 111))
+    tail.line(to: NSPoint(x: center.x + 13, y: center.y - 65))
+    tail.close()
+    tail.fill()
 }
 
 output.unlockFocus()
@@ -52,4 +51,4 @@ guard
     let png = bitmap.representation(using: .png, properties: [:])
 else { exit(3) }
 
-try png.write(to: URL(fileURLWithPath: arguments[4]))
+try png.write(to: URL(fileURLWithPath: arguments[1]))

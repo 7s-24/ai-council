@@ -47,10 +47,6 @@ Code mode is intended for review and approved text drafts, not unrestricted edit
 
 For development, run `npm run check`. The separate Git-based Council workflow uses the task files in `.ai-team/`; its rules are documented in [AGENTS.md](AGENTS.md).
 
-## Credits
+## License and credits
 
-Built using [Claw Orchestrator](https://github.com/Enderfga/claw-orchestrator) by **enderfga** (MIT). See [third-party notices](THIRD_PARTY_NOTICES.md) for the full license and other component attributions.
-
-## License
-
-[MIT](LICENSE) for AI Council’s original code. Third-party components and provider marks retain their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE). Built using [Claw Orchestrator](https://github.com/Enderfga/claw-orchestrator) by enderfga ([MIT notice](licenses/claw-orchestrator-MIT.txt)). Dependencies retain their own licenses. Model markers and the app icon are original AI Council artwork; service names identify integrations and do not imply endorsement.

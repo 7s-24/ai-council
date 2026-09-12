@@ -69,11 +69,7 @@ xcrun swiftc \
   -framework AppKit \
   "$PROJECT_ROOT/macos/AICouncilApp/IconGenerator.swift" \
   -o "$ICON_GENERATOR"
-"$ICON_GENERATOR" \
-  "$PROJECT_ROOT/public/logos/claude.svg" \
-  "$PROJECT_ROOT/public/logos/codex.svg" \
-  "$PROJECT_ROOT/public/logos/gemini.svg" \
-  "$ICON_BASE"
+"$ICON_GENERATOR" "$ICON_BASE"
 
 mkdir -p "$ICONSET"
 for size in 16 32 128 256 512; do
@@ -81,14 +77,7 @@ for size in 16 32 128 256 512; do
   double=$((size * 2))
   sips -z "$double" "$double" "$ICON_BASE" --out "$ICONSET/icon_${size}x${size}@2x.png" >/dev/null
 done
-if ! iconutil -c icns "$ICONSET" -o "$RESOURCES_DIR/AppIcon.icns"; then
-  EXISTING_ICON="$OUTPUT_APP/Contents/Resources/AppIcon.icns"
-  if [[ ! -f "$EXISTING_ICON" ]]; then
-    echo "Unable to build AppIcon.icns and no existing icon is available." >&2
-    exit 1
-  fi
-  cp "$EXISTING_ICON" "$RESOURCES_DIR/AppIcon.icns"
-fi
+iconutil -c icns "$ICONSET" -o "$RESOURCES_DIR/AppIcon.icns"
 
 codesign --force --deep --sign - "$STAGED_APP" >/dev/null
 rm -rf "$OUTPUT_APP"
