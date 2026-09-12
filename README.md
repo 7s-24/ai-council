@@ -50,3 +50,7 @@ For development, run `npm run check`. The separate Git-based Council workflow us
 ## Credits
 
 Built using [Claw Orchestrator](https://github.com/Enderfga/claw-orchestrator) by **enderfga** (MIT). See [third-party notices](THIRD_PARTY_NOTICES.md) for the full license and other component attributions.
+
+## License
+
+[MIT](LICENSE) for AI Council’s original code. Third-party components and provider marks retain their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md).

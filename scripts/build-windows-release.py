@@ -62,6 +62,7 @@ def main():
         shutil.rmtree(STAGE)
     STAGE.mkdir(parents=True)
     copy(ROOT / 'THIRD_PARTY_NOTICES.md', STAGE / 'THIRD_PARTY_NOTICES.md')
+    copy(ROOT / 'LICENSE', STAGE / 'LICENSE')
     for filename in SCRIPTS:
         copy(ROOT / 'scripts' / filename, STAGE / 'app/scripts' / filename)
     for filename in PUBLIC:
@@ -72,7 +73,7 @@ def main():
             target = STAGE / filename
             target.write_bytes(target.read_text().replace('\r\n', '\n').replace('\n', '\r\n').encode('utf-8'))
     (STAGE / 'app/package.json').write_text(json.dumps({
-        'name': 'ai-council-windows-preview', 'version': VERSION, 'private': True, 'type': 'module',
+        'name': 'ai-council-windows-preview', 'version': VERSION, 'private': True, 'type': 'module', 'license': 'MIT',
     }, indent=2) + '\n')
     browser_bundle = 'dist/browser/markdown-it.umd.min.js'
     copy(ROOT / 'node_modules/markdown-it' / browser_bundle,
