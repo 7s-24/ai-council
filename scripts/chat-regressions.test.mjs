@@ -7,6 +7,7 @@ import test from 'node:test';
 import * as policy from './chat-policy.mjs';
 import * as sessions from './chat-sessions.mjs';
 import * as protocol from './chat-protocol.mjs';
+import { fileURLToPath } from 'node:url';
 
 const serverSource = fs.readFileSync(new URL('./chat-server.mjs', import.meta.url), 'utf8');
 const clientSource = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
@@ -24,10 +25,17 @@ function functionsFrom(source, names) {
   }).join('\n');
 }
 
+function linkDirectory(target, link) {
+  const type = process.platform === 'win32' ? 'junction' : 'dir';
+  fs.symlinkSync(target, link, type);
+}
+
 function fixture(t) {
-  const audits = new URL('../.ai-team/audits/', import.meta.url);
+  const audits = fileURLToPath(
+    new URL('../.ai-team/audits/', import.meta.url),
+  );
   fs.mkdirSync(audits, { recursive: true });
-  const root = fs.mkdtempSync(path.join(audits.pathname, 'regression-'));
+  const root = fs.mkdtempSync(path.join(audits, 'regression-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const project = { id: 'test-project', path: path.join(root, 'project') };
   fs.mkdirSync(project.path);
@@ -55,15 +63,15 @@ test('artifact writes reject linked root, nested parents, and dangling links bef
   const outside = path.join(root, 'outside');
   fs.mkdirSync(outside);
   const artifacts = path.join(project.path, 'artifacts');
-  fs.symlinkSync(outside, artifacts);
+  linkDirectory(outside, artifacts);
   assert.throws(() => c.applyArtifact(project, { path: 'artifacts/new/probe.md', content: 'bad' }), /Symbolic links/);
   assert.deepEqual(fs.readdirSync(outside), []);
   fs.unlinkSync(artifacts);
   fs.mkdirSync(artifacts);
   fs.writeFileSync(path.join(outside, 'existing.md'), 'original');
-  fs.symlinkSync(outside, path.join(artifacts, 'nested'));
+  linkDirectory(outside, path.join(artifacts, 'nested'));
   assert.throws(() => c.applyArtifact(project, { path: 'artifacts/nested/existing.md', content: 'bad' }), /Symbolic links/);
-  fs.symlinkSync(path.join(root, 'missing'), path.join(artifacts, 'dangling'));
+  linkDirectory(path.join(root, 'missing'), path.join(artifacts, 'dangling'));
   assert.throws(() => c.applyArtifact(project, { path: 'artifacts/dangling/file.md', content: 'bad' }), /Symbolic links/);
   assert.equal(fs.readFileSync(path.join(outside, 'existing.md'), 'utf8'), 'original');
   assert.equal(fs.existsSync(path.join(root, 'missing')), false);

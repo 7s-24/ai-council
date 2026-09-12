@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { PassThrough } from 'node:stream';
 import { EventEmitter } from 'node:events';
 import { cliInvocation, windowsTurn, turnEvent, WindowsChatManager } from './windows-agents.mjs';
@@ -9,9 +10,11 @@ import { resolveAgentBinary } from './agent-binaries.mjs';
 import { psLiteral, encodedScript } from './windows-desktop.mjs';
 
 function fixture(t) {
-  const base = new URL('../.ai-team/audits/', import.meta.url);
+  const base = fileURLToPath(
+    new URL('../.ai-team/audits/', import.meta.url),
+  );
   fs.mkdirSync(base, { recursive: true });
-  const root = fs.mkdtempSync(path.join(base.pathname, 'win-test-'));
+  const root = fs.mkdtempSync(path.join(base, 'win-test-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   return root;
 }
