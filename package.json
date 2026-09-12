@@ -6,6 +6,7 @@
   "description": "A local shared workspace for Claude Code, Codex CLI, and Antigravity CLI.",
   "scripts": {
     "doctor": "node scripts/doctor.mjs",
+    "gemini:access": "node scripts/gemini-code-access.mjs",
     "team": "node scripts/council.mjs",
     "team:dry-run": "node scripts/council.mjs --dry-run",
     "team:review": "node scripts/council-action.mjs review",
@@ -13,8 +14,10 @@
     "team:reject": "node scripts/council-action.mjs reject",
     "team:status": "node scripts/council-action.mjs status",
     "chat": "node scripts/chat-server.mjs",
-    "chat:test": "node --test scripts/chat-policy.test.mjs scripts/chat-protocol.test.mjs scripts/markdown-render.test.mjs",
-    "check": "node --check scripts/lib.mjs && node --check scripts/doctor.mjs && node --check scripts/council.mjs && node --check scripts/council-action.mjs && node --check scripts/chat-policy.mjs && node --check scripts/chat-protocol.mjs && node --check scripts/chat-server.mjs && node --check public/app.js && npm run chat:test"
+    "windows:build": "python3 scripts/build-windows-release.py",
+    "macos:build": "./scripts/build-macos-app.sh",
+    "chat:test": "node --test scripts/windows-release.test.mjs scripts/chat-regressions.test.mjs scripts/chat-policy.test.mjs scripts/chat-progress.test.mjs scripts/chat-prompt.test.mjs scripts/chat-protocol.test.mjs scripts/chat-sessions.test.mjs scripts/chat-settings.test.mjs scripts/project-catalog.test.mjs scripts/markdown-render.test.mjs scripts/i18n.test.mjs",
+    "check": "node --check scripts/windows-agents.mjs && node --check scripts/windows-desktop.mjs && node --check scripts/lib.mjs && node --check scripts/agent-binaries.mjs && node --check scripts/gemini-code-access.mjs && node --check scripts/doctor.mjs && node --check scripts/council.mjs && node --check scripts/council-action.mjs && node --check scripts/chat-policy.mjs && node --check scripts/chat-protocol.mjs && node --check scripts/chat-progress.mjs && node --check scripts/chat-prompt.mjs && node --check scripts/chat-sessions.mjs && node --check scripts/chat-settings.mjs && node --check scripts/project-catalog.mjs && node --check scripts/chat-server.mjs && node --check public/i18n.js && node --check public/app.js && npm run chat:test"
   },
   "devDependencies": {
     "@enderfga/claw-orchestrator": "6.2.0"

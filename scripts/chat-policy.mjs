@@ -4,7 +4,9 @@ import path from 'node:path';
 import { root } from './lib.mjs';
 
 export const artifactsRoot = path.join(root, 'artifacts');
-export const chatRuntimeRoot = path.join(root, '.ai-team', 'chat', 'runtime');
+export const chatRuntimeRoot = process.env.AI_COUNCIL_DATA_DIR
+  ? path.resolve(process.env.AI_COUNCIL_DATA_DIR)
+  : path.join(root, '.ai-team', 'chat', 'runtime');
 
 const MAX_FILES = 12;
 const MAX_FILE_BYTES = 200_000;
@@ -44,7 +46,16 @@ const readableExtensions = new Set([
 ]);
 
 const artifactExtensions = new Set(['.csv', '.json', '.md', '.txt', '.yaml', '.yml']);
-const deniedDirectories = new Set(['.git', '.worktrees', 'node_modules']);
+const deniedDirectories = new Set([
+  '.build',
+  '.claude',
+  '.codex',
+  '.gemini',
+  '.git',
+  '.worktrees',
+  'dist',
+  'node_modules',
+]);
 const deniedPrefixes = ['.ai-team/chat/runtime/', '.ai-team/runtime/'];
 const sensitiveDirectories = new Set(['.aws', '.gnupg', '.ssh']);
 
@@ -89,9 +100,10 @@ export function isReadableRelativePath(value) {
   return readableExtensions.has(extension) || ['LICENSE', 'Makefile'].includes(path.posix.basename(relativePath));
 }
 
-export function listReadableFiles() {
+export function listReadableFiles(repositoryRoot = root) {
+  const scopedRoot = path.resolve(repositoryRoot);
   const files = [];
-  const stack = [{ absolute: root, relative: '' }];
+  const stack = [{ absolute: scopedRoot, relative: '' }];
 
   while (stack.length) {
     const current = stack.pop();
@@ -115,7 +127,8 @@ export function listReadableFiles() {
   return files.sort((left, right) => left.path.localeCompare(right.path));
 }
 
-export function readSelectedFiles(values) {
+export function readSelectedFiles(values, repositoryRoot = root) {
+  const scopedRoot = path.resolve(repositoryRoot);
   if (!Array.isArray(values)) throw new Error('files must be an array.');
   const unique = [...new Set(values)];
   if (unique.length > MAX_FILES) throw new Error(`Select at most ${MAX_FILES} files.`);
@@ -124,8 +137,8 @@ export function readSelectedFiles(values) {
   return unique.map((value) => {
     const relativePath = normalizeRepositoryPath(value);
     if (!isReadableRelativePath(relativePath)) throw new Error(`File is not readable by policy: ${relativePath}`);
-    const absolutePath = path.resolve(root, relativePath);
-    if (!absolutePath.startsWith(`${root}${path.sep}`)) throw new Error('Path escaped the repository.');
+    const absolutePath = path.resolve(scopedRoot, relativePath);
+    if (!absolutePath.startsWith(`${scopedRoot}${path.sep}`)) throw new Error('Path escaped the repository.');
     const stat = fs.lstatSync(absolutePath);
     if (!stat.isFile() || stat.isSymbolicLink()) throw new Error(`Not a regular file: ${relativePath}`);
     if (stat.size > MAX_FILE_BYTES) throw new Error(`File is too large: ${relativePath}`);
@@ -137,7 +150,9 @@ export function readSelectedFiles(values) {
   });
 }
 
-export function normalizeArtifactPath(value) {
+export function normalizeArtifactPath(value, repositoryRoot = root) {
+  const scopedRoot = path.resolve(repositoryRoot);
+  const scopedArtifactsRoot = path.join(scopedRoot, 'artifacts');
   const relativePath = normalizeRepositoryPath(value);
   if (!relativePath.startsWith('artifacts/')) throw new Error('Artifacts must be inside artifacts/.');
   if (relativePath === 'artifacts/.gitkeep') throw new Error('The placeholder file cannot be modified.');
@@ -146,8 +161,22 @@ export function normalizeArtifactPath(value) {
   }
   const extension = path.posix.extname(relativePath).toLowerCase();
   if (!artifactExtensions.has(extension)) throw new Error('Artifact type is not allowed.');
-  const absolutePath = path.resolve(root, relativePath);
-  if (!absolutePath.startsWith(`${artifactsRoot}${path.sep}`)) throw new Error('Artifact path escaped artifacts/.');
+  const absolutePath = path.resolve(scopedRoot, relativePath);
+  if (!absolutePath.startsWith(`${scopedArtifactsRoot}${path.sep}`)) throw new Error('Artifact path escaped artifacts/.');
+  // Reject links at every component, including artifacts/ itself and dangling
+  // links. Check before mkdir/read/write so validation cannot create outside dirs.
+  let current = scopedRoot;
+  for (const part of relativePath.split('/')) {
+    current = path.join(current, part);
+    try {
+      const stat = fs.lstatSync(current);
+      if (stat.isSymbolicLink()) throw new Error('Symbolic links are not allowed in artifact paths.');
+      if (current !== absolutePath && !stat.isDirectory()) throw new Error('Artifact parent is not a directory.');
+    } catch (error) {
+      if (error.code === 'ENOENT') break;
+      throw error;
+    }
+  }
   return { relativePath, absolutePath };
 }
 
@@ -162,13 +191,13 @@ export function contentHash(value) {
   return crypto.createHash('sha256').update(value, 'utf8').digest('hex');
 }
 
-export function extractArtifactProposals(output, registry = {}) {
+export function extractArtifactProposals(output, registry = {}, repositoryRoot = root) {
   const proposals = [];
   const expression = /<artifact\s+path="([^"]+)">\s*([\s\S]*?)\s*<\/artifact>/gi;
   let match;
   while ((match = expression.exec(String(output))) && proposals.length < MAX_PROPOSALS) {
     try {
-      const { relativePath, absolutePath } = normalizeArtifactPath(match[1]);
+      const { relativePath, absolutePath } = normalizeArtifactPath(match[1], repositoryRoot);
       const content = validateArtifactContent(match[2]);
       const exists = fs.existsSync(absolutePath);
       const registered = Boolean(registry[relativePath]);

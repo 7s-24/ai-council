@@ -18,6 +18,8 @@ test('read policy allows ordinary text and rejects sensitive or escaped paths', 
   assert.equal(isReadableRelativePath('config/token.json'), false);
   assert.equal(isReadableRelativePath('keys/private.pem'), false);
   assert.equal(isReadableRelativePath('.git/config'), false);
+  assert.equal(isReadableRelativePath('.claude/worktrees/task/plan.md'), false);
+  assert.equal(isReadableRelativePath('.build/generated.txt'), false);
   assert.equal(isReadableRelativePath('node_modules/pkg/README.md'), false);
 });
 

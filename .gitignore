@@ -1,6 +1,9 @@
 node_modules/
+.build/
+/dist/
 .worktrees/
 .ai-team/runtime/
 .ai-team/chat/runtime/
+.ai-team/audits/
 .DS_Store
 *.log
