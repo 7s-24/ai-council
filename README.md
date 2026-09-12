@@ -46,3 +46,7 @@ Model access uses your own accounts. Conversations are stored locally, but promp
 Code mode is intended for review and approved text drafts, not unrestricted editing. Gemini's Code-mode tool access needs additional configuration.
 
 For development, run `npm run check`. The separate Git-based Council workflow uses the task files in `.ai-team/`; its rules are documented in [AGENTS.md](AGENTS.md).
+
+## Credits
+
+Built using [Claw Orchestrator](https://github.com/Enderfga/claw-orchestrator) by **enderfga** (MIT). See [third-party notices](THIRD_PARTY_NOTICES.md) for the full license and other component attributions.

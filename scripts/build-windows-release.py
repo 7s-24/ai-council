@@ -61,6 +61,7 @@ def main():
     if STAGE.exists():
         shutil.rmtree(STAGE)
     STAGE.mkdir(parents=True)
+    copy(ROOT / 'THIRD_PARTY_NOTICES.md', STAGE / 'THIRD_PARTY_NOTICES.md')
     for filename in SCRIPTS:
         copy(ROOT / 'scripts' / filename, STAGE / 'app/scripts' / filename)
     for filename in PUBLIC:
