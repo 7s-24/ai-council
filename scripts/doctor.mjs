@@ -1,5 +1,9 @@
-import { command, git } from './lib.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { command, git, root } from './lib.mjs';
 import { resolveAgentBinaries } from './agent-binaries.mjs';
+import { cliInvocation } from './windows-agents.mjs';
 
 const binaries = resolveAgentBinaries();
 const missing = { status: 1, stdout: '', stderr: '', error: new Error('not installed') };
@@ -7,7 +11,24 @@ const missing = { status: 1, stdout: '', stderr: '', error: new Error('not insta
 // Report against the same binaries the chatroom will actually run, so doctor
 // cannot say a CLI is missing while the chatroom happily uses it.
 function run(name, args) {
-  return binaries[name] ? command(binaries[name], args) : missing;
+  const binary = binaries[name];
+  if (!binary) return missing;
+
+  try {
+    if (process.platform === 'win32') {
+      const invocation = cliInvocation(binary, args);
+      return command(invocation.command, invocation.args);
+    }
+
+    return command(binary, args);
+  } catch (error) {
+    return {
+      status: 1,
+      stdout: '',
+      stderr: '',
+      error,
+    };
+  }
 }
 
 const checks = [];
@@ -55,7 +76,20 @@ record('Gemini access', agyModels, (r) =>
   r.status === 0 && /gemini-/i.test(r.stdout) ? 'signed in; Gemini models available' : 'not confirmed',
 );
 
-const clawVersion = command('clawo', ['--version']);
+const clawEntry = path.join(
+  root,
+  'node_modules',
+  '@enderfga',
+  'claw-orchestrator',
+  'dist',
+  'bin',
+  'cli.js',
+);
+
+const clawVersion = fs.existsSync(clawEntry)
+  ? command(process.execPath, [clawEntry, '--version'])
+  : command('clawo', ['--version']);
+
 record('Claw Orchestrator', clawVersion, firstLine);
 
 try {
